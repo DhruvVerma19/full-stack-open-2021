@@ -9,5 +9,17 @@ const Person = (props) => {
   );
 };
 
+const PersonsList = ({personslist}) => {
+  
+  const personList = personslist.map(person => {
+    return( <Person key={person.name} name={person.name} number={person.number}/>);
+    
+    });
 
-export default Person
+  return (
+      <div>
+        {personList}
+      </div>
+  );
+};
+export default PersonsList;

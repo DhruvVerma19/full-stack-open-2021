@@ -1,27 +1,30 @@
 import React, { useState } from "react";
-import Person from "./components/Person";
+import PersonsList from "./components/Person";
+import PersonForm from "./components/personForm";
+import PersonFilter from "./components/personFilter";
 
+const beginingPersonList = [
+  {
+    name: "Arto Hellas",
+    number: "000-000000"
+
+  },
+  
+  { name: 'Ada Lovelace',
+    number: '39-44-5323523' 
+  },
+  
+  { name: 'Dan Abramov', 
+    number: '12-43-234345' 
+  },
+  
+  { name: 'Mary Poppendieck', 
+    number: '39-23-6423122' 
+}
+];
 
 const App = () => {
-  const beginingPersonList = [
-    {
-      name: "Arto Hellas",
-      number: "000-000000"
-  
-    },
-    
-    { name: 'Ada Lovelace',
-      number: '39-44-5323523' 
-    },
-    
-    { name: 'Dan Abramov', 
-      number: '12-43-234345' 
-    },
-    
-    { name: 'Mary Poppendieck', 
-      number: '39-23-6423122' 
-  }
-  ];
+ 
 
   const [persons, setPersons] = useState(beginingPersonList);
   const [newName, setNewName] = useState("");
@@ -36,9 +39,7 @@ const App = () => {
     return person.name.toUpperCase().includes(nameFilter.toUpperCase());
   });
 
-  const personsList = filterPersonList.map(person => {
-    return <Person key={person.name} name={person.name} number={person.number}/>;
-  });
+  
   
   const handleNameChange = (event) => {
     setNewName(event.target.value);
@@ -73,26 +74,18 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      filter shown with:{" "}
-      <input onChange={(event) => handleFilterChange(event)} value={nameFilter}/>
+      <PersonFilter handleFilterChange={(event) => handleFilterChange(event)} value = {nameFilter} />
       <h2>add a new</h2>
-      <form onSubmit={(event) => formSubmit(event)}>
-        <div>
-          name:{" "}
-          <input onChange={(event) => handleNameChange(event)} value={newName} />
-        </div>
-        <br />
-        <div>
-          number:{" "}
-          <input
-            onChange={(event) => handleNumberChange(event)} value={newNumber} />
-        </div>
-        <div>
-          <button type="submit">add</button>
-        </div>
-      </form>
+      <PersonForm 
+      nameValue={newName}
+      numberValue={newNumber}
+      handleFormSubmit={(event) => formSubmit(event)}
+      handleNameChange = {(event) => handleNameChange(event)}
+      handleNumberChange = {(event) => handleNumberChange(event)}
+   
+      />
       <h2>Numbers</h2>
-      {personsList}
+      <PersonsList personslist={filterPersonList} />
     </div>
   );
 };
