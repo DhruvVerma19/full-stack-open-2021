@@ -1,36 +1,25 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import PersonsList from "./components/Person";
 import PersonForm from "./components/personForm";
 import PersonFilter from "./components/personFilter";
+import axios from "axios";
 
-const beginingPersonList = [
-  {
-    name: "Arto Hellas",
-    number: "000-000000"
-
-  },
-  
-  { name: 'Ada Lovelace',
-    number: '39-44-5323523' 
-  },
-  
-  { name: 'Dan Abramov', 
-    number: '12-43-234345' 
-  },
-  
-  { name: 'Mary Poppendieck', 
-    number: '39-23-6423122' 
-}
-];
 
 const App = () => {
  
 
-  const [persons, setPersons] = useState(beginingPersonList);
+  const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [nameFilter, setNameFilter] = useState("");
   
+  const fetchPersons = () => {
+    axios.get("http://localhost:3001/persons").then(response => {
+      setPersons(response.data);
+    });
+  };
+  useEffect(fetchPersons, []);
+
   const personName = persons.map(person => {
     return person.name.toLocaleUpperCase();
   });
