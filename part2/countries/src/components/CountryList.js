@@ -1,11 +1,16 @@
 import React from "react";
 import Country from "./Country";
 
-const CountryList = ({ countrieslist }) => {
+const CountryList = ({countrieslist, handleShowClick}) => {
 
   const countriesList = countrieslist.map(country => {
-    return <div key={country.alpha3Code}>{country.name}</div>;
-  });
+    return (
+        <div>
+            <span key={country.alpha3Code}>{country.name}</span>
+            <br />
+            <button onClick={handleShowClick} id={country.name}> show </button>
+        </div>
+   ); });
 
   if(countrieslist.length > 10){
       return (
@@ -25,7 +30,7 @@ const CountryList = ({ countrieslist }) => {
       <Country country={countrieslist[0]} />
     </div>
 
-  )}
+  );}
   else{
     return null;  
   }

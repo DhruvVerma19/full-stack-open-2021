@@ -40,6 +40,10 @@ function App() {
       setFiltered(true);
     }
   };
+
+  const handleShowClick = (event) => {
+    setFilterCountry(event.target.id);
+  }
   
   return (
     
@@ -49,7 +53,7 @@ function App() {
         <CountryList countrieslist={exactFilteredCountries} />
       )}
       {filtered && !matchedcountries && (
-        <CountryList countrieslist={filteredCountries} />
+        <CountryList countrieslist={filteredCountries} handleShowClick={(event) => handleShowClick(event)}/>
       )}
     </div>
   );
