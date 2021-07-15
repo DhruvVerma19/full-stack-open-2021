@@ -41,6 +41,28 @@ const App = () => {
     setNameFilter(event.target.value);
   };
 
+  const deletePerson = (id) => {
+    var del = true;
+    personService.remove(id) .catch(err => {
+      console.log(err);
+      del = false;
+    }).finally(() => {
+     if(del){
+        setPersons(persons.filter(person => person.id !== id))
+     }
+    })
+    
+  }
+
+  const handleDelClick = (event) => {
+    const id = parseInt(event.target.dataset.id);
+    const specificPerson = persons.find(person => person.id === id);
+    const delPerson = window.confirm(`Delete ${specificPerson.name}?`);
+    if(delPerson){
+      deletePerson(id);
+    }
+  }
+
   const formSubmit = (event) => {
     event.preventDefault();
 
@@ -76,7 +98,7 @@ const App = () => {
    
       />
       <h2>Numbers</h2>
-      <PersonsList personslist={filterPersonList} />
+      <PersonsList personslist={filterPersonList} handleDelClick={(event) => handleDelClick(event)}/>
     </div>
   );
 };
