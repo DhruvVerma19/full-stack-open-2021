@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import PersonsList from "./components/Person";
 import PersonForm from "./components/personForm";
 import PersonFilter from "./components/personFilter";
-import axios from "axios";
-
+import personService from "./services/persons";
 
 const App = () => {
  
@@ -13,12 +12,12 @@ const App = () => {
   const [newNumber, setNewNumber] = useState("");
   const [nameFilter, setNameFilter] = useState("");
   
-  const fetchPersons = () => {
-    axios.get("http://localhost:3001/persons").then(response => {
-      setPersons(response.data);
-    });
-  };
-  useEffect(fetchPersons, []);
+  
+  useEffect(() => {
+      personService.getAll().then(fetchPersons => {
+        setPersons(fetchPersons);
+      })
+  }, []);
 
   const personName = persons.map(person => {
     return person.name.toLocaleUpperCase();
@@ -53,15 +52,15 @@ const App = () => {
         name: newName,
         number:newNumber
        };
-       axios.post("http://localhost:3001/persons", person).then(response => {
-        setPersons(persons.concat(response.data))
+       personService.create(person).then(setPerson => {
+              setPersons(persons.concat(setPerson))
+              setNewName('');
+              setNewNumber('');
       });
-      }
    
-
-     setNewName("");
-     setNewNumber("");
-  };
+    }
+     
+  }
 
   return (
     <div>
