@@ -16,4 +16,9 @@ const remove = (id) => {
     const req = axios.delete(`${url}/${id}`)
     return req;
   }
-export default {getAll, create, remove};
+
+const update = (id, newDetails) => {
+    const req = axios.put(`${url}/${id}`, newDetails);
+    return req.then(response => response.data);
+} 
+export default {getAll, create, remove, update}

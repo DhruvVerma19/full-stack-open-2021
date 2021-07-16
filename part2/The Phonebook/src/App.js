@@ -63,11 +63,33 @@ const App = () => {
     }
   }
 
+  const updatePerson = () => {
+    const person = persons.find(person => person.name.toUpperCase() === newName.toUpperCase());
+    const updateConf = window.confirm(`${person.name} is already added to phonebook, replace the old number with a new one?`);
+
+    if(updateConf){
+      const updatedInfo = {...person, number:newNumber};
+      const id = person.id;
+      return personService.update(id, updatedInfo).then(returnInfo => {
+        setPersons(persons.map(person => (person.id ? person : returnInfo)));
+        return true;
+      })
+    }
+    else{
+      return Promise.resolve(false);
+    }
+
+  }
+
   const formSubmit = (event) => {
     event.preventDefault();
 
     if (personName.includes(newName.toLocaleUpperCase())) {
-      alert(`${newName} is already added to phonebook.`);
+      updatePerson().then(updatedSuccessfully => {
+        if(updatedSuccessfully){
+          alert("Person updated successfully");
+        }
+      })
     }
     else {
         const person = {
