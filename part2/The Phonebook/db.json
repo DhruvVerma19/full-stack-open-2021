@@ -1,24 +1,19 @@
 {
   "persons": [
     {
-      "name": "Ada Lovelace",
-      "number": "39-44-5323523",
+      "name": "Gupta",
+      "number": "66642069",
       "id": 2
     },
     {
-      "name": "Dan Abramov",
-      "number": "12-43-234345",
+      "name": "ada",
+      "number": "53665254",
       "id": 3
     },
     {
-      "name": "Mary Poppendieck",
-      "number": "39-23-6423122",
+      "name": "arto",
+      "number": "45515",
       "id": 4
-    },
-    {
-      "name": "abraham",
-      "number": "546345354132",
-      "id": 5
     }
   ]
 }

@@ -3,6 +3,8 @@ import PersonsList from "./components/Person";
 import PersonForm from "./components/personForm";
 import PersonFilter from "./components/personFilter";
 import personService from "./services/persons";
+import Notification from "./components/Notifications";
+import { memberExpression } from "@babel/types";
 
 const App = () => {
  
@@ -11,6 +13,7 @@ const App = () => {
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [nameFilter, setNameFilter] = useState("");
+  const [errMessage, setErrMessage] = useState(null);
   
   
   useEffect(() => {
@@ -43,7 +46,7 @@ const App = () => {
 
   const deletePerson = (id) => {
     var del = true;
-    personService.remove(id) .catch(err => {
+    personService.remove(id).catch(err => {
       console.log(err);
       del = false;
     }).finally(() => {
@@ -61,6 +64,16 @@ const App = () => {
     if(delPerson){
       deletePerson(id);
     }
+    setPersons(persons.filter(person => person.id !== specificPerson.id))
+    setErrMessage(
+      `${specificPerson.name} was successfully deleted`
+    )
+     
+    setTimeout(() => {
+      setErrMessage(null)
+    }, 5000)
+  
+    
   }
 
   const updatePerson = () => {
@@ -72,6 +85,8 @@ const App = () => {
       const id = person.id;
       return personService.update(id, updatedInfo).then(returnInfo => {
         setPersons(persons.map(person => (person.id ? person : returnInfo)));
+        
+        
         return true;
       })
     }
@@ -85,11 +100,20 @@ const App = () => {
     event.preventDefault();
 
     if (personName.includes(newName.toLocaleUpperCase())) {
+
       updatePerson().then(updatedSuccessfully => {
         if(updatedSuccessfully){
-          alert("Person updated successfully");
-        }
-      })
+          
+          setErrMessage(`${newName} was successfully updated`)
+        setTimeout(() => {
+          setErrMessage(null)
+        }, 5000)
+       }
+      }).catch(() => {
+        setErrMessage(
+          `Information of ${newName} has already been removed from server`
+        )
+            })
     }
     else {
         const person = {
@@ -100,6 +124,8 @@ const App = () => {
               setPersons(persons.concat(setPerson))
               setNewName('');
               setNewNumber('');
+              setErrMessage(`${newName} was successfully added`)
+              setTimeout(() => {setErrMessage(null)}, 5000)
       });
    
     }
@@ -109,6 +135,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={errMessage} />
       <PersonFilter handleFilterChange={(event) => handleFilterChange(event)} value = {nameFilter} />
       <h2>add a new</h2>
       <PersonForm 

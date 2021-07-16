@@ -7,7 +7,7 @@ const Person = (props) => {
       <br />
     </div>
   );
-};
+}; 
 
 const PersonsList = ({personslist, handleDelClick}) => {
   
