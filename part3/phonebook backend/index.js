@@ -18,6 +18,9 @@ const errorHandler = (error, request, response, next) => {
       error: 'Malformatted id'
     })
   }
+  else if (error.name === 'ValidationError') {
+    return response.status(400).json({ error: error.message })
+}
   next(error)
 }
 app.use(morgan((tokens, req, res) => {
@@ -84,7 +87,7 @@ app.put('/api/persons/:id', (request, response, next) => {
 
 
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
   
 
   const body = request.body
@@ -117,7 +120,7 @@ app.post('/api/persons', (request, response) => {
   })
   person.save().then(result => {
     response.json(result);
-  })
+  }).catch(error => next(error))
 })
 app.use(errorHandler)
 const PORT = process.env.PORT
