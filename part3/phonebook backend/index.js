@@ -1,36 +1,25 @@
 const express = require('express');
 const morgan = require('morgan');
-const cors = require('cors')
+const cors = require('cors');
+require('dotenv').config();
 
-
-let persons = [
-  { 
-    "id": 1,
-    "name": "Arto Hellas", 
-    "number": "040-123456"
-  },
-  { 
-    "id": 2,
-    "name": "Ada Lovelace", 
-    "number": "39-44-5323523"
-  },
-  { 
-    "id": 3,
-    "name": "Dan Abramov", 
-    "number": "12-43-234345"
-  },
-  { 
-    "id": 4,
-    "name": "Mary Poppendieck", 
-    "number": "39-23-6423122"
-  }
-]
 const app = express();
+const Person = require('./models/person');
+
 app.use(express.json())
 app.use(cors())
 app.use(express.static('build'))
 
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
 
+  if(error.name === "CastError"){
+    return response.status(400).send({
+      error: 'Malformatted id'
+    })
+  }
+  next(error)
+}
 app.use(morgan((tokens, req, res) => {
   return [
     tokens.method(req, res),
@@ -42,47 +31,62 @@ app.use(morgan((tokens, req, res) => {
 }))
 
 app.get('/api/persons', (request, response) => {
- response.json(persons);
+ Person.find({}).then(result => {
+   response.json(result);
+ })
 })
 
 app.get('/info', (request, response) => {
   const date = new Date().toLocaleString();
   const zone = Intl.DateTimeFormat().resolvedOptions().timeZone
   response.send(`<div>
-                  <p>Phonebook has info for ${persons.length} people</p>
+                  <p>Phonebook has info for ${Person.length} people</p>
                 </div>
                 <div>
                   <p>${date} (${zone})</p>
                 </div>`);
 })
 
-app.get('/api/persons/:id', (request, response) => {
-  const id = Number(request.params.id)
-  const specificPerson = persons.find(person => person.id === id)
+app.get('/api/persons/:id', (request, response, next) => {
   
-  if (specificPerson) {
-    response.json(specificPerson)
-  } else {
-    response.status(404).end()
-  }
+  Person.findById(request.params.id).then(person => {
+    if (person) {
+      response.json(person)
+    } else {
+      response.status(404).json({error: 'The person does not exist'});
+    }
+  }).catch((error) => next(error))
+  
+  
 })
 
-app.delete('/api/persons/:id', (request, response) => {
-  const id = Number(request.params.id)
-  persons = persons.filter(person => person.id !== id)
+app.delete('/api/persons/:id', (request, response, next) => {
+  Person.findByIdAndRemove(request.params.id).then(result => {
+    response.status(204).end()
 
-  response.status(204).end()
+  }).catch((error) => next(error))
+
+
 })
 
-const genId = () => {
-  const len = persons.length;
-  
-  const id = Math.floor(Math.random()*1000);
-  
-  return id;
-}
+app.put('/api/persons/:id', (request, response, next) => {
+    const body = request.body
+    const person = {
+      name:body.name,
+      number:body.number
+    }
+    Person.findByIdAndUpdate(request.params.id, person, {new:true}).then(
+      updatedInfo => {
+        response.json(updatedInfo)
+      }
+    ).catch((error) => next(error))
+})
+
+
 
 app.post('/api/persons', (request, response) => {
+  
+
   const body = request.body
 
   if (!body.name || !body.number) {
@@ -90,25 +94,32 @@ app.post('/api/persons', (request, response) => {
       error: 'The name or number is missing'
     })
   }
+  Person.find({}).then(result => {
+    let i = 0;  
+    for(i; i < result.length; i++){
+      if(body.name === result[i].name && body.number === result[i].number){
+        return response.status(400).json({ 
+          error: 'The name must be unique'
+        })
+        break
+      }
 
-  const commonName =  persons.find(person => person.name === body.name)
-  if(commonName){
-    return response.status(400).json({
-      error: 'The name must be unique'
-    })
-  }
-  const person = {
-    id: genId(),
+      else{
+          continue  
+      }
+    }
+  })
+
+
+  const person = new Person({
     name: body.name,
     number: body.number
-  }
-
-  persons = persons.concat(person);
-
-  response.json(person);
+  })
+  person.save().then(result => {
+    response.json(result);
+  })
 })
-
-const PORT = process.env.PORT || 3001
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
-})
+app.use(errorHandler)
+const PORT = process.env.PORT
+app.listen(PORT)
+console.log(`Server running on ${PORT}`)
