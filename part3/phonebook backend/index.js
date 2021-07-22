@@ -1,10 +1,10 @@
-const express = require('express');
-const morgan = require('morgan');
-const cors = require('cors');
-require('dotenv').config();
+const express = require('express')
+const morgan = require('morgan')
+const cors = require('cors')
+require('dotenv').config()
 
-const app = express();
-const Person = require('./models/person');
+const app = express()
+const Person = require('./models/person')
 
 app.use(express.json())
 app.use(cors())
@@ -13,14 +13,14 @@ app.use(express.static('build'))
 const errorHandler = (error, request, response, next) => {
   console.error(error.message)
 
-  if(error.name === "CastError"){
+  if(error.name === 'CastError'){
     return response.status(400).send({
       error: 'Malformatted id'
     })
   }
   else if (error.name === 'ValidationError') {
     return response.status(400).json({ error: error.message })
-}
+  }
   next(error)
 }
 app.use(morgan((tokens, req, res) => {
@@ -34,20 +34,20 @@ app.use(morgan((tokens, req, res) => {
 }))
 
 app.get('/api/persons', (request, response) => {
- Person.find({}).then(result => {
-   response.json(result);
- })
+  Person.find({}).then(result => {
+    response.json(result)
+  })
 })
 
 app.get('/info', (request, response) => {
-  const date = new Date().toLocaleString();
+  const date = new Date().toLocaleString()
   const zone = Intl.DateTimeFormat().resolvedOptions().timeZone
   response.send(`<div>
                   <p>Phonebook has info for ${Person.length} people</p>
                 </div>
                 <div>
                   <p>${date} (${zone})</p>
-                </div>`);
+                </div>`)
 })
 
 app.get('/api/persons/:id', (request, response, next) => {
@@ -56,7 +56,7 @@ app.get('/api/persons/:id', (request, response, next) => {
     if (person) {
       response.json(person)
     } else {
-      response.status(404).json({error: 'The person does not exist'});
+      response.status(404).json({error: 'The person does not exist'})
     }
   }).catch((error) => next(error))
   
@@ -64,7 +64,7 @@ app.get('/api/persons/:id', (request, response, next) => {
 })
 
 app.delete('/api/persons/:id', (request, response, next) => {
-  Person.findByIdAndRemove(request.params.id).then(result => {
+  Person.findByIdAndRemove(request.params.id).then(() => {
     response.status(204).end()
 
   }).catch((error) => next(error))
@@ -73,16 +73,16 @@ app.delete('/api/persons/:id', (request, response, next) => {
 })
 
 app.put('/api/persons/:id', (request, response, next) => {
-    const body = request.body
-    const person = {
-      name:body.name,
-      number:body.number
+  const body = request.body
+  const person = {
+    name:body.name,
+    number:body.number
+  }
+  Person.findByIdAndUpdate(request.params.id, person, {new:true}).then(
+    updatedInfo => {
+      response.json(updatedInfo)
     }
-    Person.findByIdAndUpdate(request.params.id, person, {new:true}).then(
-      updatedInfo => {
-        response.json(updatedInfo)
-      }
-    ).catch((error) => next(error))
+  ).catch((error) => next(error))
 })
 
 
@@ -98,17 +98,16 @@ app.post('/api/persons', (request, response, next) => {
     })
   }
   Person.find({}).then(result => {
-    let i = 0;  
+    let i = 0  
     for(i; i < result.length; i++){
       if(body.name === result[i].name && body.number === result[i].number){
         return response.status(400).json({ 
           error: 'The name must be unique'
         })
-        break
       }
 
       else{
-          continue  
+        continue  
       }
     }
   })
@@ -119,7 +118,7 @@ app.post('/api/persons', (request, response, next) => {
     number: body.number
   })
   person.save().then(result => {
-    response.json(result);
+    response.json(result)
   }).catch(error => next(error))
 })
 app.use(errorHandler)
