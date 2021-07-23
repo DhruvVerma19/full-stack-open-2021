@@ -1,7 +1,6 @@
 const listHelper = require('../utils/list_helper')
 
 describe('total likes', () => {
-
   test('of empty list is zero', () => {
     const listWithZeroBlog = []
     const result = listHelper.totalLikes(listWithZeroBlog)
@@ -74,6 +73,7 @@ describe('total likes', () => {
       __v: 0
     }
   ]
+
   test('of a bigger list is calculated right', () => {
     const result = listHelper.totalLikes(blogs)
     expect(result).toBe(36)
