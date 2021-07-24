@@ -5,6 +5,7 @@ const api = supertest(app)
 const helper = require('./test_helper')
 const Blog = require('../models/blog')
 
+
 beforeEach(async () => {
   jest.setTimeout(30000)
 
@@ -104,6 +105,7 @@ describe('deletion of a blog', () => {
     expect(blog_title).not.toContain(deleted_blog.title)
   })
 })
+
 
 afterAll(() => {
   mongoose.connection.close()
