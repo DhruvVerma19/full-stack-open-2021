@@ -3,16 +3,8 @@ const supertest = require('supertest')
 const app = require('../app')
 const api = supertest(app)
 const helper = require('./test_helper')
-const Blog = require('../models/blog')
 const bcrypt = require('bcryptjs')
 const User = require('../models/users')
-
-beforeEach(async () => {
-  jest.setTimeout(30000)
-
-  await Blog.deleteMany({})
-  await Blog.insertMany(helper.initialBlogs)
-})
 
 
 describe('when there is initially one user at db', () => {
