@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
-import loginService from "./services/login"
+import loginService from './services/login'
 import Notification from './Notifications'
 
+
+
 const App = () => {
-  const [message, setMessage] = useState(null)
   const [blogs, setBlogs] = useState([])
+  const [errMessage, setErrMessage] = useState(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
@@ -14,17 +16,16 @@ const App = () => {
   const [url, setUrl] = useState('')
   const [author, setAuthor] = useState('')
 
-
   useEffect(() => {
     blogService.getAll().then(blogs =>
-      setBlogs( blogs )
-    )  
+      setBlogs(blogs)
+    )
   }, [])
 
   useEffect(() => {
-    const loggedin_user = window.localStorage.getItem('loggedBlogappUser')
-    if(loggedin_user){
-      const user = JSON.parse(loggedin_user)
+    const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
+    if (loggedUserJSON) {
+      const user = JSON.parse(loggedUserJSON)
       setUser(user)
       blogService.set_token(user.token)
     }
@@ -32,106 +33,141 @@ const App = () => {
 
   useEffect(() => {
     setTimeout(() => {
-      setMessage(null)
+      setErrMessage(null)
     }, 5000)
-  }, [message])
+  }, [errMessage])
 
-  const login = async(e) => {
-    e.preventDefault()
-    try{
-      const user = await loginService.login({username, password})
-      window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user))
+  const user_login = async (e) => {
+    e.preDefault()
+
+    try {
+      const user = await loginService.login({
+        username, password
+      })
+
+      window.localStorage.setItem(
+        'loggedBlogappUser', JSON.stringify(user)
+      )
       blogService.set_token(user.token)
       setUser(user)
       setUsername('')
       setPassword('')
-      setMessage(`Welcome ${user.name}!`)
-    }
-    catch(exception){
-      setMessage(`Wrong username or password`)
+      setErrMessage(`Welcome ${user.name}`)
+    } catch (exception) {
+      setErrMessage('wrong username or password')
     }
   }
-  const logout = async() => {
+
+  const user_logout = async () => {
     window.localStorage.removeItem('loggedBlogappUser')
-    setMessage(`Logout Success`)
+    setErrMessage('Logout success')
     setUser(null)
   }
 
-  const additionBlog = async(e) => {
-    e.preventDefault()
+  const addition_blog = async (e) => {
+    e.preDefault()
     try {
-      const res = await blogService.create({
-        title, author, url
+      const response = await blogService.create({
+        title,
+        author,
+        url
       })
-      setBlogs(blogs.concat(res))
+      setBlogs(blogs.concat(response))
       setTitle('')
-      setUrl('')
       setAuthor('')
-      setMessage(`A new blog ${title} by ${author} added`)
-    }
-    catch(exception){
-      setMessage(`A new blog ${title} by ${author} not added`)
+      setUrl('')
+      setErrMessage(`a new blog ${title} by ${author} added`)
+    } catch (exception) {
+      setErrMessage(`a new blog ${title} by ${author} not added`)
     }
   }
 
-  const loginForm = () => {
-    <form onSubmit={login}>
+  const login_info = () => (
+    <form onSubmit={user_login}>
       <div>
         username
-        <input type='text' value={username} name='Username' onChange={(target) => setUsername(target.value)} />
+        <input
+          type='text'
+          value={username}
+          name='Username'
+          onChange={({ target }) => setUsername(target.value)}
+        />
       </div>
       <div>
         password
-        <input type='password' value={password} name='Password' onChange={(target) => setPassword(target.value)} />
+        <input
+          type='password'
+          value={password}
+          name='Password'
+          onChange={({ target }) => setPassword(target.value)}
+        />
       </div>
       <button type='submit'>login</button>
     </form>
-  }
+  )
 
-  const info = () => {
-    return(
-      <div>
-        {user.name} logged in <button onClick={logout}>Logout</button>
-      </div>
-    )
-  }
-
-  const blogInfo = () => {
+  const user_info = () => (
     <div>
-      <form onSubmit={additionBlog}>
+      {user.name} logged in <button onClick={user_logout}>Logout</button>
+    </div>
+  )
+
+  const blog_info = () => (
+    <div>
+      <form onSubmit={addition_blog}>
         <div>
-          title:<input value={title} name='title' onChange={(target) => setTitle(target.value)} />
+          title: <input
+            value={title}
+            name='title'
+            onChange={({ target }) => setTitle(target.value)}
+          />
         </div>
         <div>
-          author:<input value={author} name='author' onChange={(target) => setAuthor(target.value)} />
+          author: <input
+            value={author}
+            name='author'
+            onChange={({ target }) => setAuthor(target.value)}
+          />
         </div>
         <div>
-          url:<input value={url} name='url' onChange={(target) => setUrl(target.value)} />
+          url: <input
+            value={url}
+            name='url'
+            onChange={({ target }) => setUrl(target.value)}
+          />
         </div>
         <button type='submit'>Add</button>
       </form>
     </div>
-  }
-  return (
-    <div>
-      <Notification message={message} />
-      {user === null ?
-        <div>
+  )
+  if(user === null){
+    return(<div>
+            <div>
+              <Notification message={errMessage} />
+            </div>
+            <div>
           <h2>Log in to application</h2>
-          {loginForm()}
+          {login_info()}
         </div>
-        :
-        <div>
+          </div>)
+  }
+  else{
+    return(
+    <div>
+      <div>
+        <Notification message={errMessage} />
+      </div>
+      <div>
           <h2>blogs</h2>
-          {info()}
-          {blogInfo()}
+          {user_info()}
+          {blog_info()}
           {blogs.map(blog =>
             <Blog key={blog.id} blog={blog} />
           )}
         </div>
-      }
-    </div>
-  )
+        </div>
+      )
+  }
 }
 
 export default App

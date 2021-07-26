@@ -24,6 +24,8 @@ const Notification = ({ message }) => {
     if (message === null) {
       return null
     }
+    else{
+      
 
     if (message.includes('wrong username or password')){
       return (
@@ -47,5 +49,6 @@ const Notification = ({ message }) => {
       )
     }
   }
+}
 
 export default Notification
