@@ -1,26 +1,27 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Blog from './components/Blog'
+import Notification from './Notifications'
+import LoginForm from './components/LoginForm'
+import BlogInfo from './components/BlogInfo'
+import Toggle from './components/Toggle'
 import blogService from './services/blogs'
 import loginService from './services/login'
-import Notification from './Notifications'
-
-
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
-  const [errMessage, setErrMessage] = useState(null)
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
+  const [message, setMessage] = useState(null)
+
+  const [username, setUsername] = useState('test')
+  const [password, setPassword] = useState('password')
+  const [update, setUpdate] = useState(null)
+
   const [user, setUser] = useState(null)
-  const [title, setTitle] = useState('')
-  const [url, setUrl] = useState('')
-  const [author, setAuthor] = useState('')
+
+  const blogRef = useRef()
 
   useEffect(() => {
-    blogService.getAll().then(blogs =>
-      setBlogs(blogs)
-    )
-  }, [])
+    blogService.getAll().then((blogs) => setBlogs(blogs))
+  }, [update])
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
@@ -33,141 +34,91 @@ const App = () => {
 
   useEffect(() => {
     setTimeout(() => {
-      setErrMessage(null)
+      setMessage(null)
     }, 5000)
-  }, [errMessage])
+  }, [message])
 
-  const user_login = async (e) => {
-    e.preDefault()
+  const fn_login = async (event) => {
+    event.preventDefault()
 
     try {
       const user = await loginService.login({
-        username, password
+        username,
+        password,
       })
 
-      window.localStorage.setItem(
-        'loggedBlogappUser', JSON.stringify(user)
-      )
       blogService.set_token(user.token)
+      window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user))
+
       setUser(user)
       setUsername('')
       setPassword('')
-      setErrMessage(`Welcome ${user.name}`)
+      setMessage(`Welcome ${user.name}`)
     } catch (exception) {
-      setErrMessage('wrong username or password')
+      setMessage(`wrong username or password'`)
     }
   }
 
-  const user_logout = async () => {
+  const handleLogout = async () => {
     window.localStorage.removeItem('loggedBlogappUser')
-    setErrMessage('Logout success')
+    setMessage(`Logout success`)
     setUser(null)
   }
 
-  const addition_blog = async (e) => {
-    e.preDefault()
+  const add_blog = async (obj) => {
     try {
-      const response = await blogService.create({
-        title,
-        author,
-        url
-      })
+      blogRef.current.toggleVisibility()
+      const response = await blogService.create(obj)
       setBlogs(blogs.concat(response))
-      setTitle('')
-      setAuthor('')
-      setUrl('')
-      setErrMessage(`a new blog ${title} by ${author} added`)
+      setMessage(`A new blog ${response.title} by ${response.author} added`)
     } catch (exception) {
-      setErrMessage(`a new blog ${title} by ${author} not added`)
+      setMessage(`A new blog not added`)
     }
   }
 
-  const login_info = () => (
-    <form onSubmit={user_login}>
-      <div>
-        username
-        <input
-          type='text'
-          value={username}
-          name='Username'
-          onChange={({ target }) => setUsername(target.value)}
-        />
-      </div>
-      <div>
-        password
-        <input
-          type='password'
-          value={password}
-          name='Password'
-          onChange={({ target }) => setPassword(target.value)}
-        />
-      </div>
-      <button type='submit'>login</button>
-    </form>
+  const loginForm = () => (
+    <Toggle buttonLabel="log in">
+      <LoginForm
+        fn_submit={fn_login}
+        username={username}
+        password={password}
+        fn_usr_change={({ target }) => setUsername(target.value)}
+        fn_pass_change={({ target }) => setPassword(target.value)}
+      />
+    </Toggle>
   )
 
-  const user_info = () => (
+  const userInfo = () => (
     <div>
-      {user.name} logged in <button onClick={user_logout}>Logout</button>
+      {user.name} logged in <button onClick={handleLogout}>Logout</button>
     </div>
   )
+
 
   const blog_info = () => (
+    <Toggle buttonLabel="Create Blog" ref={blogRef}>
+      <BlogInfo blog_addition={add_blog} />
+    </Toggle>
+  )
+
+  return (
     <div>
-      <form onSubmit={addition_blog}>
+      <Notification message={message} />
+      {user === null ? (
         <div>
-          title: <input
-            value={title}
-            name='title'
-            onChange={({ target }) => setTitle(target.value)}
-          />
+          <h2>Log in to application</h2>
+          {loginForm()}
         </div>
+      ) : (
         <div>
-          author: <input
-            value={author}
-            name='author'
-            onChange={({ target }) => setAuthor(target.value)}
-          />
+          <h2>blogs</h2>
+          {userInfo()}
+          {blog_info()}
+          {blogs.map((blog) => <Blog blog={blog} update={setUpdate} />)}
         </div>
-        <div>
-          url: <input
-            value={url}
-            name='url'
-            onChange={({ target }) => setUrl(target.value)}
-          />
-        </div>
-        <button type='submit'>Add</button>
-      </form>
+      )}
     </div>
   )
-  if(user === null){
-    return(<div>
-            <div>
-              <Notification message={errMessage} />
-            </div>
-            <div>
-          <h2>Log in to application</h2>
-          {login_info()}
-        </div>
-          </div>)
-  }
-  else{
-    return(
-    <div>
-      <div>
-        <Notification message={errMessage} />
-      </div>
-      <div>
-          <h2>blogs</h2>
-          {user_info()}
-          {blog_info()}
-          {blogs.map(blog =>
-            <Blog key={blog.id} blog={blog} />
-          )}
-        </div>
-        </div>
-      )
-  }
 }
 
 export default App

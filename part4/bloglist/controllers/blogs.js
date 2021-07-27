@@ -2,13 +2,15 @@ const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
 const User = require('../models/users')
 const jwt = require('jsonwebtoken')
+const middleware = require('../utils/middleware')
+
 
 blogsRouter.get('/', async(request, response) => {
   const blogs = await Blog.find({}).populate('user', { username:1, name:1 })
   response.json(blogs.map(blog => blog.toJSON()))
 })
 
-blogsRouter.post('/', async (request, response) => {
+blogsRouter.post('/', middleware.userExtractor, async(request, response) => {
   const token = request.token
   const decoded_token = jwt.verify(token, process.env.SECRET)
   const body = request.body
@@ -43,7 +45,7 @@ blogsRouter.get('/:id', async(request, response) => {
   }
 })
 
-blogsRouter.delete('/:id', async (request, response) => {
+blogsRouter.delete('/:id', middleware.userExtractor, async(request, response) => {
   const token = request.token
   const decoded_token = jwt.verify(token, process.env.SECRET)
 
@@ -63,13 +65,10 @@ blogsRouter.delete('/:id', async (request, response) => {
 
 })
 //Tested with Postman
-blogsRouter.put('/:id', async (request, response) => {
+blogsRouter.put('/:id', middleware.userExtractor, async(request, response) => {
   const body = request.body
 
   const blog = {
-    title: body.title,
-    author: body.author,
-    url: body.url,
     likes: body.likes
   }
 
