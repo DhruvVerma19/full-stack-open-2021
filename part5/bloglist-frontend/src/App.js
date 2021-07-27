@@ -59,7 +59,7 @@ const App = () => {
     }
   }
 
-  const handleLogout = async () => {
+  const fn_logout = async () => {
     window.localStorage.removeItem('loggedBlogappUser')
     setMessage('Logout success')
     setUser(null)
@@ -73,6 +73,24 @@ const App = () => {
       setMessage(`A new blog ${response.title} by ${response.author} added`)
     } catch (exception) {
       setMessage('A new blog not added')
+    }
+  }
+  const fn_likes = async (id, likes) => {
+    await blogService.update({
+      id: id,
+      likes: likes + 1,
+    })
+    setUpdate(Math.floor(Math.random() * 1000))
+  }
+
+  const fn_remove = async (blog) => {
+    const result = window.confirm(`Remove ${blog.title} by ${blog.author}`)
+
+    if (result) {
+      await blogService.remove({
+        id: blog.id,
+      })
+      setUpdate(Math.floor(Math.random() * 1000))
     }
   }
 
@@ -90,7 +108,7 @@ const App = () => {
 
   const userInfo = () => (
     <div>
-      {user.name} logged in <button onClick={handleLogout}>Logout</button>
+      {user.name} logged in <button onClick={fn_logout}>Logout</button>
     </div>
   )
 
@@ -114,7 +132,7 @@ const App = () => {
           <h2>blogs</h2>
           {userInfo()}
           {blog_info()}
-          {blogs.map((blog) => <Blog key={blog.id} blog={blog} update={setUpdate} />)}
+          {blogs.map((blog) => <Blog key={blog.id} blog={blog} likes={fn_likes} remove={fn_remove} />)}
         </div>
       )}
     </div>
