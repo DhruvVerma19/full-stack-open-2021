@@ -55,13 +55,13 @@ const App = () => {
       setPassword('')
       setMessage(`Welcome ${user.name}`)
     } catch (exception) {
-      setMessage(`wrong username or password'`)
+      setMessage('wrong username or password\'')
     }
   }
 
   const handleLogout = async () => {
     window.localStorage.removeItem('loggedBlogappUser')
-    setMessage(`Logout success`)
+    setMessage('Logout success')
     setUser(null)
   }
 
@@ -72,12 +72,12 @@ const App = () => {
       setBlogs(blogs.concat(response))
       setMessage(`A new blog ${response.title} by ${response.author} added`)
     } catch (exception) {
-      setMessage(`A new blog not added`)
+      setMessage('A new blog not added')
     }
   }
 
   const loginForm = () => (
-    <Toggle buttonLabel="log in">
+    <Toggle label="log in">
       <LoginForm
         fn_submit={fn_login}
         username={username}
@@ -96,7 +96,7 @@ const App = () => {
 
 
   const blog_info = () => (
-    <Toggle buttonLabel="Create Blog" ref={blogRef}>
+    <Toggle label="Create Blog" ref={blogRef}>
       <BlogInfo blog_addition={add_blog} />
     </Toggle>
   )
@@ -114,7 +114,7 @@ const App = () => {
           <h2>blogs</h2>
           {userInfo()}
           {blog_info()}
-          {blogs.map((blog) => <Blog blog={blog} update={setUpdate} />)}
+          {blogs.map((blog) => <Blog key={blog.id} blog={blog} update={setUpdate} />)}
         </div>
       )}
     </div>

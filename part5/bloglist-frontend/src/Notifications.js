@@ -21,11 +21,11 @@ const errorStyle = {
 }
 
 const Notification = ({ message }) => {
-    if (message === null) {
-      return null
-    }
-    else{
-      
+  if (message === null) {
+    return null
+  }
+  else{
+
 
     if (message.includes('wrong username or password')){
       return (
@@ -35,12 +35,12 @@ const Notification = ({ message }) => {
       )
     }
     else if(message.includes('not added')){
-        return (
-            <div style={errorStyle} className="error">
-              {message}
-            </div>
-          )
-    } 
+      return (
+        <div style={errorStyle} className="error">
+          {message}
+        </div>
+      )
+    }
     else {
       return (
         <div style={favorableStyle} className="error">
