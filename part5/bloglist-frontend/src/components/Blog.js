@@ -16,10 +16,10 @@ const Blog = ({ blog, likes, remove }) => {
       <div>
         <p>{blog.url}</p>
         <p>
-          {blog.likes} {' '} <button onClick={() => likes(blog.id, blog.likes)}>like</button>
+          {blog.likes} {' '} <button className="like-blog" onClick={() => likes(blog.id, blog.likes)}>like</button>
         </p>
         <p>{blog.author}{' '}
-          <button onClick={() => remove(blog)}>Remove</button> </p>
+          <button className="remove-blog" onClick={() => remove(blog)}>Remove</button> </p>
       </div>
     )
   }
