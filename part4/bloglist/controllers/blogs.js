@@ -10,13 +10,10 @@ blogsRouter.get('/', async(request, response) => {
   response.json(blogs.map(blog => blog.toJSON()))
 })
 
-blogsRouter.post('/', middleware.userExtractor, async(request, response) => {
+blogsRouter.post('/', async(request, response) => {
   const token = request.token
   const decoded_token = jwt.verify(token, process.env.SECRET)
   const body = request.body
-  if (!token || !decoded_token.id) {
-    return response.status(401).json({ error: 'Token is missing or is invalid' })
-  }
 
   const user = await User.findById(decoded_token.id)
   if (!body.title || !body.url){
