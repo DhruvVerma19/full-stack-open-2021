@@ -1,17 +1,16 @@
 import React from 'react'
-import { useDispatch } from 'react-redux'
+import { connect } from 'react-redux'
 import { addAnec } from '../reducers/anecdoteReducer'
 import { VisibleNotify } from '../reducers/notificationReducer'
 
-const AnecdoteForm = () => {
-  const dispatch = useDispatch()
+const AnecdoteForm = (props) => {
 
   const createAnecdote = async(event) => {
     event.preventDefault()
     const content = event.target.anecdote.value
     event.target.anecdote.value = ''
-    dispatch(addAnec(content))
-    dispatch(VisibleNotify(`You created '${content}'`, 4))
+    props.addAnec(content)
+    props.VisibleNotify(`You created '${content}'`, 4)
     
   }
   
@@ -29,4 +28,4 @@ const AnecdoteForm = () => {
   )
 }
 
-export default AnecdoteForm
+export default connect(null, {addAnec, VisibleNotify})(AnecdoteForm)

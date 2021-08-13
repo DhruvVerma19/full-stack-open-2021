@@ -15,7 +15,7 @@ const AnecdoteList = () => {
 
   const vote = (anecdote) => {
     dispatch(Vote_Increment(anecdote))
-    dispatch(VisibleNotify(`You voted '${anecdote.content}'`, 4))
+    dispatch(VisibleNotify(`You voted '${anecdote.content}'`, 5))
   }
 
   return (

@@ -1,3 +1,5 @@
+let id = 0
+
 const notificationReducer = (state = null, action) => {
     switch (action.type) {
       case 'Visible_Notify': {
@@ -10,13 +12,8 @@ const notificationReducer = (state = null, action) => {
   
   export const VisibleNotify = (notification, time) => {
     return async (dispatch) => {
-      dispatch({
-      type: 'Visible_Notify',
-      data: {
-        notification,
-      },
-    })
-    setTimeout(() => 
+      clearTimeout(id)
+      id = setTimeout(() =>
       dispatch({
         type: 'Visible_Notify',
         data: {
@@ -24,6 +21,12 @@ const notificationReducer = (state = null, action) => {
         },
     }), time * 1000
     )
+    dispatch({
+      type: 'Visible_Notify',
+      data:{
+        notification
+      }
+    })
   
 }
   }
