@@ -8,13 +8,24 @@ const notificationReducer = (state = null, action) => {
     }
   }
   
-  export const VisibleNotify = (notification) => {
-    return {
+  export const VisibleNotify = (notification, time) => {
+    return async (dispatch) => {
+      dispatch({
       type: 'Visible_Notify',
       data: {
         notification,
       },
-    }
+    })
+    setTimeout(() => 
+      dispatch({
+        type: 'Visible_Notify',
+        data: {
+          notification: null,
+        },
+    }), time * 1000
+    )
+  
+}
   }
   
   export default notificationReducer

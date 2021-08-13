@@ -6,15 +6,13 @@ import { VisibleNotify } from '../reducers/notificationReducer'
 const AnecdoteForm = () => {
   const dispatch = useDispatch()
 
-  const createAnecdote = (event) => {
+  const createAnecdote = async(event) => {
     event.preventDefault()
     const content = event.target.anecdote.value
     event.target.anecdote.value = ''
     dispatch(addAnec(content))
-    dispatch(VisibleNotify(`You created '${content}'`))
-    setTimeout(() => {
-      dispatch(VisibleNotify(null))
-    }, 4000)
+    dispatch(VisibleNotify(`You created '${content}'`, 4))
+    
   }
   
 

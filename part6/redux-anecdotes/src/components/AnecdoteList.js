@@ -9,16 +9,13 @@ const AnecdoteList = () => {
       const anecdotes = state.anecdotes
     if (filter === '') return anecdotes
 
-    return anecdotes.filter((anecdote) => anecdote.content.indexOf(filter) > 0)
+    return anecdotes.filter((anecdote) => anecdote.content.toLowerCase().indexOf(filter.toLowerCase()) > -1)
   })
   const dispatch = useDispatch()
 
   const vote = (anecdote) => {
-    dispatch(Vote_Increment(anecdote.id))
-    dispatch(VisibleNotify(`You voted '${anecdote.content}'`))
-    setTimeout(() => {
-      dispatch(VisibleNotify(null))
-    }, 4000)
+    dispatch(Vote_Increment(anecdote))
+    dispatch(VisibleNotify(`You voted '${anecdote.content}'`, 4))
   }
 
   return (

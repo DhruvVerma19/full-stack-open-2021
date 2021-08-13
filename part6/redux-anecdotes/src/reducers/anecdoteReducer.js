@@ -1,25 +1,7 @@
-const anecdotesAtStart = [
-  'If it hurts, do it more often',
-  'Adding manpower to a late software project makes it later!',
-  'The first 90 percent of the code accounts for the first 90 percent of the development time...The remaining 10 percent of the code accounts for the other 90 percent of the development time.',
-  'Any fool can write code that a computer can understand. Good programmers write code that humans can understand.',
-  'Premature optimization is the root of all evil.',
-  'Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.'
-]
-
-const getId = () => (100000 * Math.random()).toFixed(0)
-
-const asObject = (anecdote) => {
-  return {
-    content: anecdote,
-    id: getId(),
-    votes: 0
-  }
-}
-
-const initialState = anecdotesAtStart.map(asObject)
-
-const anecReducer = (state = initialState, action) => {
+/* eslint-disable default-case */
+import anecdotes from '../services/anecdotes'
+import anecdoteService from '../services/anecdotes'
+const anecReducer = (state = [], action) => {
   
   switch (action.type) {
     case 'Vote_Inc': {
@@ -29,28 +11,50 @@ const anecReducer = (state = initialState, action) => {
           : anecdote
       )
     }
-    case 'New_Anec': {
+    case 'New_Anec': 
       return [...state, action.data]
-    }
-  }
-  return state
-}
-
-export const Vote_Increment = (id) => {
-  return {
-    type: 'Vote_Inc',
-    data: { id },
+    
+    case 'Init_Anec':
+      return action.data
+  
+    default:
+      return state
+    
   }
 }
 
-export const addAnec = (data) => {
-  return {
-    type: 'New_Anec',
-    data: {
-      data,
-      id: getId(),
-      votes:0
-    }
+export const Vote_Increment = (anecdote) => {
+  return async(dispatch)  => {
+    await anecdoteService.vote({
+      ...anecdote, votes: anecdote.votes + 1
+    })
+    dispatch({
+      type: 'Vote_Inc',
+      data: anecdote.id
+    })
+    
+  }
+}
+
+export const addAnec = (content) => {
+  return async (dispatch) => {
+    const data = await anecdoteService.createNew(content)
+    dispatch({
+      type: 'New_Anec',
+      data: data,
+    })
+  
+  }
+}
+
+export const initAnec = () => {
+  return async (dispatch) => {
+    const data = await anecdoteService.getAll()
+    dispatch({
+      type: 'Init_Anec',
+    data: data
+    })
+
   }
 }
 
