@@ -13,6 +13,7 @@ import Togglable from './components/Togglable'
 import Users from './components/Users'
 import SingleUser from './components/SingleUser'
 import Navigation from './components/Navigation'
+import { Container } from '@material-ui/core'
 
 const App = () => {
   const dispatch = useDispatch()
@@ -57,6 +58,10 @@ const App = () => {
   const userBlogs = matchId
     ? blogs.filter((blog) => blog.user.id === matchId.params.id)
     : null
+  const matchBlogId = useRouteMatch('/blogs/:id')
+  const currentBlog = matchBlogId
+    ? blogs.find((blog) => blog.id === matchBlogId.params.id)
+    : null
 
   const blogStyle = {
     paddingTop: 10,
@@ -67,7 +72,7 @@ const App = () => {
   }
 
   return (
-    <div>
+    <Container maxWidth="xl">
       <Navigation />
       <Notification message={notification} />
       <Switch>
@@ -75,7 +80,7 @@ const App = () => {
           <SingleUser blogs={userBlogs} />
         </Route>
         <Route path="/blogs/:id">
-          <Blog blog = {createBlog} />
+          <Blog blog={currentBlog} />
         </Route>
         <Route path="/users">
           <Users />
@@ -102,7 +107,7 @@ const App = () => {
           )}
         </Route>
       </Switch>
-    </div>
+    </Container>
   )
 }
 
