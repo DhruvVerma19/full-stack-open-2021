@@ -15,10 +15,10 @@ const userSchema = new mongoose.Schema({
     minLength: [3, 'password is too short']
   },
   blogs: [
-      {
-          type:mongoose.Schema.Types.ObjectId,
-          ref: 'Blog'
-      }
+    {
+      type:mongoose.Schema.Types.ObjectId,
+      ref: 'Blog'
+    }
   ]
 })
 

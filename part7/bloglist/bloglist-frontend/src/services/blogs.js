@@ -54,6 +54,10 @@ const remove = async (blog) => {
 
   await axios.delete(`${url}/${blog.id}`, config)
 }
+const newComment = async (id, comment) => {
+  const request = await axios.post(`${url}/${id}/comments`, { comment })
+  return request.data
+}
 
 export default {
   getAll,
@@ -62,5 +66,6 @@ export default {
   update,
   remove,
   getAllUsers,
-  getUserInfo
+  getUserInfo,
+  newComment
 }

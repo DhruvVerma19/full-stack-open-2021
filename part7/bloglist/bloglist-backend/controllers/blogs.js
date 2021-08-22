@@ -74,5 +74,10 @@ blogsRouter.delete('/:id', async (request, response) => {
     error: 'Unauthorized to access the blog',
   })
 })
-
+blogsRouter.post('/:id/comments', async (request, response) => {
+  const currentBlog = await Blog.findById(request.params.id)
+  currentBlog.comments = currentBlog.comments.concat(request.body.comment)
+  currentBlog.save()
+  response.status(200).json(currentBlog)
+})
 module.exports = blogsRouter

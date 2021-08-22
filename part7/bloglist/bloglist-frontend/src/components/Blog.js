@@ -1,28 +1,21 @@
-import React, { useState } from 'react'
-import { likeBlog, deleteBlog } from '../reducers/blogReducer'
-import {  setSuccessMessage,  setErrorMessage,} from '../reducers/notificationReducer'
+import React, { useState, useEffect } from 'react'
+import { likeBlog, deleteBlog, addComment } from '../reducers/blogReducer'
+import {  setSuccessMessage,  setErrorMessage, } from '../reducers/notificationReducer'
 import { useDispatch } from 'react-redux'
 import blogService from '../services/blogs'
+import { useHistory } from 'react-router-dom'
 
 const Blog = ({ blog }) => {
-  const blogStyle = {
-    paddingTop: 10,
-    paddingLeft: 2,
-    border: 'solid',
-    borderWidth: 1,
-    marginBottom: 5,
-  }
 
   const dispatch = useDispatch()
-  const [showFull, setShowFull] = useState(false)
   const [allowRemove, setAllowRemove] = useState(false)
+  const history = useHistory()
 
-  const toggleShow = () => {
-    setShowFull(!showFull)
+  useEffect(() => {
     const user = blogService.getUserInfo()
     const blogUser = blog.user.id || blog.user
     setAllowRemove(blogUser === user.id)
-  }
+  }, [])
 
   const addLike = (id, likes) => {
     try {
@@ -44,40 +37,47 @@ const Blog = ({ blog }) => {
           setSuccessMessage(`blog ${blog.title} by ${blog.author} delete`)
         )
         dispatch(deleteBlog(blog.id))
+        history.push('/')
       } catch (error) {
         dispatch(setErrorMessage(error))
       }
     }
   }
-
+  const createComment = (e) => {
+    e.preventDefault()
+    dispatch(addComment(blog.id, e.target.comment.value))
+    e.target.comment.value = ''
+  }
   return (
-    <div style={blogStyle}>
-      <div>
-        <p className="title">
-          {blog.title}
-          <button className="view" onClick={toggleShow}>
-            view
+    <div>
+      <h1 className="title">{blog.title}</h1>
+      <div className="info">
+        <a href={blog.url}>{blog.url}</a>
+        <p>
+          <span className="likes">{blog.likes} likes</span>
+          <button className="like" onClick={addLike}>
+          like
           </button>
         </p>
-        <p className="author">{blog.author}</p>
+        <p className="author">added by {blog.author}</p>
+        {allowRemove && (
+          <button className="remove" onClick={removeBlog}>
+          remove
+          </button>
+        )}
       </div>
-      {showFull && (
-        <div className="show-full">
-          <p>{blog.url}</p>
-          <p>
-            likes <span className="likes">{blog.likes}</span>
-            <button
-              className="like"
-              onClick={() => addLike(blog.id, blog.likes)}
-            >
-              like
-            </button>
-          </p>
-          {allowRemove && (
-            <button className="remove" onClick={() => removeBlog(blog)}>
-              remove
-            </button>
-          )}
+      <div className="comments">
+        <h3>Comments</h3>
+        <form onSubmit={createComment}>
+          <input type="text" name="comment" />
+          <button type="submit">add comment</button>
+        </form>
+        <ul>
+          {blog.comments.map((comment) => (
+            <li key={comment.id}>{comment}</li>
+          ))}
+        </ul>
+      </div>
     </div>
   )
 }
