@@ -83,7 +83,7 @@ const typeDefs = gql`
   type Author {
     name: String!
     id: ID!
-    born: Int!
+    born: Int
     bookCount: Int!
   }
   type Book {
@@ -114,13 +114,13 @@ const resolvers = {
   Query: {
     authorCount: () => authors.length,
     bookCount: () => books.length,
-    allBooks: (root, args) => {
+    allBooks: (root, arguments) => {
       let filter = false
-      if (args.author) filter = (book) => book.author === args.author
-      if (args.genre) filter = (book) => book.genres.includes(args.genre)
-      if (args.author && args.genre)
+      if (arguments.author) filter = (book) => book.author === arguments.author
+      if (arguments.genre) filter = (book) => book.genres.includes(arguments.genre)
+      if (arguments.author && arguments.genre)
         filter = (book) =>
-          book.author === args.author && book.genres.includes(args.genre)
+          book.author === arguments.author && book.genres.includes(arguments.genre)
 
       return filter ? books.filter(filter) : books
     },
@@ -131,30 +131,30 @@ const resolvers = {
       books.filter((book) => book.author === root.name).length,
   },
   Mutation: {
-    addBook: (root, args) => {
-      const authorExist = authors.find((author) => author.name === args.author)
+    addBook: (root, arguments) => {
+      const authorExist = authors.find((author) => author.name === arguments.author)
       if (!authorExist) {
         const newAuthor = {
-          name: args.author,
+          name: arguments.author,
           id: uuid(),
         }
         authors = authors.concat(newAuthor)
       }
-      const book = { ...args, id: uuid() }
+      const book = { ...arguments, id: uuid() }
       books = books.concat(book)
       return book
     },
-    editAuthor: (root, args) => {
-      const authorExist = authors.find((author) => author.name === args.name)
+    editAuthor: (root, arguments) => {
+      const authorExist = authors.find((author) => author.name === arguments.name)
       if (!authorExist) return null
       authors = authors.map((author) =>
-        author.name === args.name
-          ? { ...author, name: args.name, born: args.setBornTo }
+        author.name === arguments.name
+          ? { ...author, name: arguments.name, born: arguments.setBornTo }
           : author
       )
       return {
-        name: args.name,
-        born: args.setBornTo,
+        name: arguments.name,
+        born: arguments.setBornTo,
       }
     },
   },
