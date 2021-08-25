@@ -34,7 +34,7 @@ const Books = (props) => {
           {books.map((author) =>(
             <tr key={author.title}>
               <td>{author.title}</td>
-              <td>{author.author}</td>
+              <td>{author.author.name}</td>
               <td>{author.published}</td>
             </tr>
           ))}
