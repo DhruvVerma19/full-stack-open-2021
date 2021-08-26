@@ -1,6 +1,6 @@
 const { ApolloServer, gql, UserInputError, AuthenticationError } = require('apollo-server')
 const { v1: uuid } = require('uuid')
-const jwt = required('jsonwebtoken')
+const jwt = require('jsonwebtoken')
 const mongoose = require('mongoose')
 const Author = require('./models/author')
 const Book = require('./models/book')
@@ -35,7 +35,7 @@ const typeDefs = gql`
     id: ID!
     genres: [String!]!
   }
-  type user{
+  type User{
     id: ID!
     favoriteGenre: String!
     username: String!
