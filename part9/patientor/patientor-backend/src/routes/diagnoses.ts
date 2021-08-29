@@ -7,4 +7,4 @@ diagnoseRouter.get('/', (_req, res) => {
   res.send(diagnoseService.getAll());
 });
 
-export default diagnoseRouter;
+export default diagnoseRouter; 
