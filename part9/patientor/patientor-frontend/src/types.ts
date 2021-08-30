@@ -5,9 +5,9 @@ export interface Diagnosis {
 }
 
 export enum Gender {
-  Male = 'male',
-  Female = 'female',
-  Other = 'other'
+  Male = "male",
+  Female = "female",
+  Other = "other"
 }
 
 interface BaseEntry {
@@ -19,39 +19,49 @@ interface BaseEntry {
 }
 
 export enum HealthCheckRating {
-  'Healthy' = 0,
-  'LowRisk' = 1,
-  'HighRisk' = 2,
-  'CriticalRisk' = 3
+  "Healthy" = 0,
+  "LowRisk" = 1,
+  "HighRisk" = 2,
+  "CriticalRisk" = 3
 }
 
 export interface HealthCheckEntry extends BaseEntry {
-  type: 'HealthCheck';
+  type: "HealthCheck";
   healthCheckRating: HealthCheckRating;
 }
 
-export interface OccupationalHealthcareEntry extends BaseEntry {
-  type: 'OccupationalHealthcare';
+interface SickLeave {
+  startDate: string;
+  endDate: string;
+}
+
+export interface OccupationalHealthCareEntry extends BaseEntry {
+  type: "OccupationalHealthcare";
+  sickLeave?: SickLeave;
   employerName: string;
-  sickLeave?: {
-    startDate: string;
-    endDate: string;
-  };
+} 
+
+interface Discharge {
+  criteria: string;
+  date: string;
 }
 
 export interface HospitalEntry extends BaseEntry {
-  type: 'Hospital';
-  discharge: {
-    date: string;
-    criteria: string;
-  };
+  type: "Hospital";
+  discharge?: Discharge;
 }
 
-export type Entry =
-  | HospitalEntry
-  | OccupationalHealthcareEntry
-  | HealthCheckEntry;
+export type Entry = HealthCheckEntry | OccupationalHealthCareEntry | HospitalEntry;
 
+interface AllFormValues extends BaseEntry {
+  type: string;
+  discharge?: Discharge;
+  sickLeave?: SickLeave;
+  employerName?: string;
+  healthCheckRating?: HealthCheckRating;
+}
+
+export type EntryFormValues = Omit<AllFormValues, 'id'>;
 export interface Patient {
   id: string;
   name: string;
@@ -60,4 +70,9 @@ export interface Patient {
   ssn?: string;
   dateOfBirth?: string;
   entries: Entry[];
+}
+
+export interface TypeOption {
+  value: string,
+  label: string
 }

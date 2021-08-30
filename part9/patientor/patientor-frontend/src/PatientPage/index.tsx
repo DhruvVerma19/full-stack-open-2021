@@ -1,79 +1,110 @@
-import React from 'react';
-import { Patient, Entry } from '../types';
-import { Icon } from 'semantic-ui-react';
+import React, { useEffect } from "react";
+import axios from "axios";
+import { useParams } from "react-router-dom";
+import { Icon, Button } from "semantic-ui-react";
+import { apiBaseUrl } from "../constants";
+import { Entry, Patient } from "../types";
+import { useStateValue, setPatient } from "../state";
+import EntryView from "./EntryView";
+import AddEntryModal from "../AddEntryModel";
+import { EntryFormValues } from "../types";
 
-import { useParams } from 'react-router-dom';
-import { useStateValue } from '../state';
-
-import Hospital from './Hospital';
-import HealthCheck from './HealthCheck';
-import OccupationalHealthcare from './OccupationalHealthcare';
-
-const assertNever = (value: never): never => {
-  throw new Error(
-    `Unhandled discriminated union member: ${JSON.stringify(value)}`
-  );
-};
-
-const EntryDetails: React.FC<{ entry: Entry }> = ({ entry }) => {
-  switch (entry.type) {
-    case 'Hospital':
-      return <Hospital entry={entry} />;
-    case 'OccupationalHealthcare':
-      return <OccupationalHealthcare entry={entry} />;
-    case 'HealthCheck':
-      return <HealthCheck entry={entry} />;
-    default:
-      return assertNever(entry);
+const PatientEntries = ({ entries }: { entries : Entry[]}) => {
+  if (!entries) {
+    return null;
+  } 
+  
+  if (entries.length === 0){
+    return <h4>no health entries</h4>;
   }
+
+  return (
+    <>
+      <h4>Entries</h4>
+      {entries.map(entry => <EntryView key={entry.id} entry={entry} />)}
+    </>
+  );
 };
 
-const PatientPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const [{ patients }] = useStateValue();
-  const [{ diagnoses }] = useStateValue();
+const PatientPage = () => {
+  const { id } = useParams() as { id: string };
 
-  const patient = Object.values(patients).find(
-    (patient: Patient) => patient.id === id
-  );
+  const [{ patients }, dispatch] = useStateValue();
 
-  let iconName: 'man' | 'woman' | 'genderless';
+  const patient = patients[id];
+  
+  const [modalOpen, setModalOpen] = React.useState<boolean>(false);
+  const [error, setError] = React.useState<string | undefined>();
 
-  if (patient) {
-    switch (patient.gender) {
-      case 'male':
-        iconName = 'man';
-        break;
-      case 'female':
-        iconName = 'woman';
-        break;
-      case 'other':
-        iconName = 'genderless';
-        break;
-      default:
-        iconName = 'woman';
+  useEffect(() => {
+    const fetchPatientList = async () => {
+      try {
+        const { data: patientFromApi } = await axios.get<Patient>(
+          `${apiBaseUrl}/patients/${id}`
+        );
+        dispatch(setPatient(patientFromApi));
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    if ( !patient || !patient.ssn ) {
+      void fetchPatientList();
+    }
+  }, [id]);
+  
+  if ( !patient ) {
+    return null;
+  }
+
+  const submitNewEntry = async (values: EntryFormValues) => {
+    if ( values.discharge && values.discharge.date.length === 0) {
+      values.discharge = undefined;
     }
 
-    return (
-      <div>
-        <h2>
-          {patient.name} <Icon name={iconName} />{' '}
-        </h2>
-        <p>ssh: {patient.ssn}</p>
-        <p>occupation: {patient.occupation}</p>
-        <h3>entries</h3>
-        {patient.entries.map((entry, i) => (
-          <div key={i}>
-            {Object.keys(diagnoses).length === 0 ? null : (
-              <EntryDetails entry={entry} />
-            )}
-          </div>
-        ))}
-      </div>
-    );
-  }
+    if ( values.sickLeave && values.sickLeave.startDate.length === 0) {
+      values.sickLeave = undefined;
+    }
 
-  return null;
+    const { data: patientFromApi } = await axios.post<Patient>(
+      `${apiBaseUrl}/patients/${id}/entries`,
+      values
+    );
+    dispatch(setPatient(patientFromApi));
+    closeModal();
+  };
+
+  const openModal = (): void => setModalOpen(true);
+
+  const closeModal = (): void => {
+    setModalOpen(false);
+    setError(undefined);
+  };
+
+  const genderIcon = patient.gender === 'female' ? 
+    'venus' : (patient.gender === 'male' ? 'mars' : 'genderless');
+
+  return (
+    <div className="App">
+      <h3>
+          {patient.name}
+          <Icon name={genderIcon} />
+      </h3>
+      
+      <div>ssn: {patient.ssn}</div>
+      <div>{patient.occupation}</div>
+
+      <PatientEntries entries={patient.entries}/>
+
+      <AddEntryModal 
+        modalOpen={modalOpen}
+        onSubmit={submitNewEntry}
+        error={error}
+        onClose={closeModal}
+      />
+      <Button onClick={() => openModal()}>Add New Entry</Button>
+    </div>
+  );
 };
 
 export default PatientPage;

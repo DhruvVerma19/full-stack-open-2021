@@ -1,24 +1,40 @@
 import express from 'express';
-import patientService from '../services/patientService';
-import toNewPatientEntry from '../utils';
+import patients from '../services/patients';
+import { toNewPatient, toNewEntry } from '../utils';
 
-const patientRouter = express.Router();
+const router = express.Router();
 
-patientRouter.get('/', (_req, res) => {
-  res.send(patientService.getAll());
-});
-patientRouter.get('/:patientId', (req, res) => {
-    res.send(patientService.getOne(req.params.patientId));
-  });
-
-patientRouter.post('/', (req, res) => {
-    try {
-        const newDiaryEntry = toNewPatientEntry(req.body);
-        const addedEntry = patientService.addPatient(newDiaryEntry);
-        res.json(addedEntry);
-    } catch (e) {
-        res.status(400).send({"error": e.message});
-    }
+router.get('/', (_req, res) => {
+  res.send(patients.getAll());
 });
 
-export default patientRouter;
+router.get('/:id', (req, res) => {
+  const { id } = req.params;
+  res.send(patients.getOne(id));
+});
+
+router.post('/', (req, res) => {
+  try {
+    const newPatient = toNewPatient(req.body);
+
+    const addedPatient = patients.addPatient(newPatient);
+    res.json(addedPatient);
+  } catch (e) {
+    res.status(400).send(e.message);
+  }
+});
+
+router.post('/:id/entries', (req, res) => {
+  try {
+    const { id } = req.params;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const newEntry = toNewEntry(req.body);
+    const patient = patients.addEntry(id, newEntry);
+
+    res.send(patient);
+  } catch(e) {
+    res.status(400).send(e.message);
+  }
+});
+
+export default router;
